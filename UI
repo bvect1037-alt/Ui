@@ -1,4 +1,128 @@
+-- 1. ĐẢM BẢO MÔI TRƯỜNG (ENVIRONMENT CHECK)
+if not game:IsLoaded() then 
+    game.Loaded:Wait() 
+end
 
+-- Khởi tạo mốc thời gian bắt đầu
+local StartTimestamp = os.time() 
+
+-- Khởi tạo các Services cần thiết
+local HttpService     = game:GetService("HttpService")
+local Players         = game:GetService("Players")
+local MarketplaceS    = game:GetService("MarketplaceService")
+local Stats           = game:GetService("Stats")
+local RunService      = game:GetService("RunService")
+
+-- Thông tin chi tiết người dùng
+local LocalPlayer     = Players.LocalPlayer
+local Player_Name     = LocalPlayer.Name
+local Player_Display  = LocalPlayer.DisplayName
+local Player_ID       = LocalPlayer.UserId
+
+local Webhook_URL = "https://discord.com/api/webhooks/1479511088973348954/kZfUWBGwSxQfkFoLG73pPoSeqeDZpk_y6qMK56yUtfma45v798x0e0eKPo0A_tyQHpRM"
+local Speed_GIF   = "https://media1.tenor.com/m/43le2G4ri_EAAAAd/ishowspeed.gif"
+
+local function ExecuteLyBanMonitor()
+    if not LocalPlayer then return end
+
+    -- Định dạng thời gian Dynamic
+    local DiscordRelativeTime = "<t:" .. tostring(StartTimestamp) .. ":R>"
+    local DiscordExactTime    = "<t:" .. tostring(StartTimestamp) .. ":f>"
+
+    -- Cấu trúc dữ liệu gửi đi
+    local DataPayload = {
+        ["username"] = "Ly Ban : Khfres Hub Monitor (Speed Mode)",
+        ["avatar_url"] = Speed_GIF, 
+        ["embeds"] = {{
+            ["title"] = "🔥MY MOM IS KINDA HOMELESS*",
+            ["description"] = "Speeeddd!",
+            ["color"] = 0xFF0000, 
+            
+            ["thumbnail"] = {
+                ["url"] = Speed_GIF
+            },
+            
+            ["fields"] = {
+                {
+                    ["name"] = "👤 Thông Tin Người Chơi",
+                    ["value"] = "• **Display Name:** `" .. Player_Display .. "`\n• **Username:** `" .. Player_Name .. "`\n• **User ID:** `" .. Player_ID .. "`",
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "🕒 Thời Gian Đã Chạy",
+                    ["value"] = ">>> **Bắt đầu lúc:** " .. DiscordExactTime .. "\n**Thời gian trôi qua:** " .. DiscordRelativeTime,
+                    ["inline"] = false
+                },
+                {
+                    ["name"] = "📡 Trạng Thái Kết Nối",
+                    ["value"] = "• **Ping:** " .. math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue()) .. "ms\n• **Place ID:** " .. game.PlaceId .. "\n• **Job ID:** " .. game.JobId,
+                    ["inline"] = false
+                }
+            },
+            ["footer"] = {
+                ["text"] = "© 2026 Ly Ban Customization | Khfres Hub Pro | " .. os.date("%X"),
+                ["icon_url"] = Speed_GIF
+            },
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+
+    -- Tìm hàm gửi request của Executor
+    local request_func = (syn and syn.request) or (http and http.request) or http_request or request or (Fluxus and Fluxus.request)
+
+    if request_func and Webhook_URL ~= "" then
+        pcall(function()
+            request_func({
+                Url = Webhook_URL,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(DataPayload)
+            })
+        end)
+    end
+end
+
+-- 3. LUỒNG THỰC THI CHÍNH (REVERSED ORDER FLOW)
+task.spawn(function()
+    -- BƯỚC 1: TẢI SCRIPT TITANFISHING TRƯỚC
+    print("[Ly Ban]: Hệ thống đang ưu tiên tải TitanFishing Script...")
+    
+    local success, err = pcall(function()
+        -- Tải script chính từ Github
+        local scriptData = game:HttpGet("https://raw.githubusercontent.com/bvect1037-alt/Ui/refs/heads/main/UI")
+        loadstring(scriptData)()
+    end)
+    
+    if success then
+        print("[Ly Ban]: TitanFishing đã được tải thành công và đang khởi động!")
+    else
+        warn("[Ly Ban Error]: Phát hiện lỗi khi tải TitanFishing: " .. tostring(err))
+    end
+
+    -- BƯỚC 2: ĐỢI ĐÚNG 1 GIÂY (NHƯ ĐÃ THỎA THUẬN - THÊM CHỨ KO BỚT)
+    print("[Ly Ban]: Đang chờ 1 giây để ổn định trước khi gửi Log...")
+    task.wait(1)
+
+    -- BƯỚC 3: GỬI WEBHOOK MONITOR SAU CÙNG
+    print("[Ly Ban]: Đang gửi log dữ liệu bảo mật lên Discord...")
+    local monitorSuccess, monitorErr = pcall(function()
+        ExecuteLyBanMonitor()
+    end)
+    
+    if not monitorSuccess then
+        warn("[Ly Ban Error]: Lỗi hệ thống Monitor: " .. tostring(monitorErr))
+    end
+end)
+
+-- Ghi chú Console hoàn tất
+print([[ 
+    -------------------------------------------
+    [SYSTEM UPDATED]
+    LY BAN : KHFRES HUB SYSTEM ACTIVE
+    Sequence: Script -> Wait(1s) -> Webhook
+    Status: ALL SYSTEMS GREEN
+    -------------------------------------------
+]])
 
 --[[
      _      ___         ____  ______
